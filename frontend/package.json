@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@gourishmarkan/common": "^1.1.2",
-    "@gourishmarkan/medium-common": "^1.0.1",
+    "@gourishmarkan/medium-common": "^1.0.2",
     "axios": "^1.7.2",
     "clsx": "^2.1.1",
     "multer": "^1.4.5-lts.1",

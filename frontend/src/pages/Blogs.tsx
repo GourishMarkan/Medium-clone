@@ -1,4 +1,3 @@
-import React from "react";
 import { BlogSkeleton } from "../components/BlogSkeleton";
 import { BlogCard } from "../components/BlogCard";
 import Appbar from "../components/Appbar";
@@ -30,7 +29,7 @@ const Blogs = () => {
         <div className=" max-w-xl">
           {blogs.map((blog) => (
             <BlogCard
-              id={blog.id}
+              id={blog.id.toString()}
               authorName={blog.author.name || "Anonymous"}
               title={blog.title}
               content={blog.content}

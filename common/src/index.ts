@@ -3,7 +3,7 @@ import z from "zod";
 export const signupinput = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  name: z.string(),
+  username: z.string(),
 });
 
 // type inference in zod

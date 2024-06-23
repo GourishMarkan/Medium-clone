@@ -7,7 +7,7 @@ import { BACKEND_URL } from "../config";
 export const Auth = ({ type }: { type: "signup" | "signin" }) => {
   const [postInputs, setPostInputs] = useState<SignupInput>({
     email: "",
-    name: "",
+    username: "",
     password: "",
   });
 
@@ -70,7 +70,7 @@ export const Auth = ({ type }: { type: "signup" | "signin" }) => {
                 onChange={(e) => {
                   setPostInputs((c) => ({
                     ...c,
-                    name: e.target.value,
+                    username: e.target.value,
                   }));
                 }}
               />
