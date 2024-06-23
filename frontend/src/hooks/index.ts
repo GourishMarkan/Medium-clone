@@ -11,15 +11,21 @@ export interface Blog {
   };
 }
 // for getting single blog
-export const useBlog = ({ id }: { id: sting }) => {
+export const useBlog = ({ id }: { id: string }) => {
   const [loading, setLoading] = useState(true);
   const [blog, setBlog] = useState<Blog>();
 
   useEffect(() => {
-    axios.get(`${BACKEND_URL}/api/v1/blog/${id}`).then((res) => {
-      setBlog(res.data.blog);
-      setLoading(false);
-    });
+    axios
+      .get(`${BACKEND_URL}/api/v1/blog/${id}`, {
+        headers: {
+          Authorization: localStorage.getItem("token"),
+        },
+      })
+      .then((res) => {
+        setBlog(res.data.blog);
+        setLoading(false);
+      });
   }, [id]);
 
   return {
@@ -29,19 +35,23 @@ export const useBlog = ({ id }: { id: sting }) => {
 };
 // for all blogs
 export const useBlogs = () => {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  // const [blogs, setBlogs] = useState([]);
   useEffect(() => {
     axios
-      .get(`${BACKEND_URL}/api/v1/blog/bulk`, {
+      .get(`https://backend.markangourish9.workers.dev/api/v1/blog/bulk`, {
         headers: {
           Authorization: localStorage.getItem("token"),
         },
       })
-      .then((res) => {
-        setBlogs(res.data.blogs);
+      .then((response) => {
+        setBlogs(response.data.allBlogs);
         setLoading(false);
       });
   }, []);
+  return {
+    loading,
+    blogs,
+  };
 };

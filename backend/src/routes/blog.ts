@@ -29,36 +29,47 @@ export const blogRouter = new Hono<{
 //   }
 // });
 
-blogRouter.use(async (c, next) => {
-  const jwt = c.req.header("Authorization");
+blogRouter.use("/*", async (c, next) => {
+  const jwt = c.req.header("authorization");
   console.log(jwt);
   if (!jwt) {
     c.status(401);
-    return c.json({ error: "unauthorized" });
+    return c.json({ message: "You are not logged in" });
   }
   // const token = jwt.split(" ")[1];
-  const payload = await verify(jwt, c.env.JWT_SECRET);
-  if (!payload || !payload.id) {
-    c.status(401);
-    return c.json({ error: "unauthorized" });
+  try {
+    const user = await verify(jwt, c.env.JWT_SECRET);
+    if (!user || !user.id) {
+      c.status(401);
+      return c.json({ error: "unauthorized" });
+    } else {
+      c.set("userId", user.id);
+      await next();
+    }
+  } catch (e) {
+    c.status(403);
+    return c.json({
+      message: `You are not logged in ${e}`,
+    });
   }
-
-  c.set("userId", payload.id);
-  await next();
 });
 
 blogRouter.post("/", async (c) => {
   const userId = c.get("userId");
   console.log(userId);
-  const prisma = new PrismaClient({
-    datasourceUrl: c.env?.DATABASE_URL,
-  }).$extends(withAccelerate());
 
   const body = await c.req.json();
   console.log(body, userId);
   if (!createPostInput.safeParse(body)) {
     return c.json({ message: "invalid data" });
   }
+  const prisma = new PrismaClient({
+    datasources: {
+      db: {
+        url: c.env?.DATABASE_URL,
+      },
+    },
+  }).$extends(withAccelerate());
   const post = await prisma.post.create({
     data: {
       title: body.title,
@@ -73,6 +84,11 @@ blogRouter.post("/", async (c) => {
 
 // update blog--
 blogRouter.put("/", async (c) => {
+  const body = await c.req.json();
+  if (!updatePostInput.safeParse(body)) {
+    c.status(411);
+    return c.json({ message: "invalid data" });
+  }
   const prisma = new PrismaClient({
     datasources: {
       db: {
@@ -80,10 +96,6 @@ blogRouter.put("/", async (c) => {
       },
     },
   }).$extends(withAccelerate());
-  const body = await c.req.json();
-  if (!updatePostInput.safeParse(body)) {
-    return c.json({ message: "invalid data" });
-  }
   const updatedBlog = await prisma.post.update({
     where: {
       id: body.id,
@@ -98,7 +110,6 @@ blogRouter.put("/", async (c) => {
 // get blog for all id--
 // TODO:ADD padgination
 blogRouter.get("/bulk", async (c) => {
-  const body = await c.req.json();
   const prisma = new PrismaClient({
     datasources: {
       db: {
@@ -108,9 +119,9 @@ blogRouter.get("/bulk", async (c) => {
   }).$extends(withAccelerate());
   const allBlogs = await prisma.post.findMany({
     select: {
-      // id:true
       content: true,
       title: true,
+      id: true,
       author: {
         select: {
           name: true,
@@ -122,8 +133,8 @@ blogRouter.get("/bulk", async (c) => {
 });
 
 // get blog for one id--
-blogRouter.get("/get/:id", async (c) => {
-  const id = await c.req.param("id");
+blogRouter.get("/:id", async (c) => {
+  const id = c.req.param("id");
   const prisma = new PrismaClient({
     datasources: {
       db: {
@@ -138,7 +149,7 @@ blogRouter.get("/get/:id", async (c) => {
         id: id,
       },
       select: {
-        // id:true,
+        id: true,
         title: true,
         content: true,
         author: {
