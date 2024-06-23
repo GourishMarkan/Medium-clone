@@ -2,15 +2,15 @@ import z from "zod";
 export declare const signupinput: z.ZodObject<{
     email: z.ZodString;
     password: z.ZodString;
-    username: z.ZodString;
+    name: z.ZodString;
 }, "strip", z.ZodTypeAny, {
     email: string;
     password: string;
-    username: string;
+    name: string;
 }, {
     email: string;
     password: string;
-    username: string;
+    name: string;
 }>;
 export type SignupInput = z.infer<typeof signupinput>;
 export declare const signininput: z.ZodObject<{
